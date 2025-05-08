@@ -14,10 +14,13 @@ import com.lhq.aianswer.model.dto.user_answer.UserAnswerAddRequest;
 import com.lhq.aianswer.model.dto.user_answer.UserAnswerEditRequest;
 import com.lhq.aianswer.model.dto.user_answer.UserAnswerQueryRequest;
 import com.lhq.aianswer.model.dto.user_answer.UserAnswerUpdateRequest;
+import com.lhq.aianswer.model.entity.App;
 import com.lhq.aianswer.model.entity.UserAnswer;
 import com.lhq.aianswer.model.entity.User;
 import com.lhq.aianswer.model.vo.UserAnswerVO;
 import com.lhq.aianswer.model.vo.UserVO;
+import com.lhq.aianswer.scoring.ScoringStrategyExecutor;
+import com.lhq.aianswer.service.AppService;
 import com.lhq.aianswer.service.UserAnswerService;
 import com.lhq.aianswer.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 /**
@@ -45,6 +49,12 @@ public class UserAnswerController {
 
     @Resource
     private UserService userService;
+    
+    @Resource
+    private AppService appService;
+    
+    @Resource
+    private ScoringStrategyExecutor scoringStrategyExecutor;
 
     // region 增删改查
 
@@ -61,9 +71,14 @@ public class UserAnswerController {
         // 在此处将实体类和 DTO 进行转换
         UserAnswer userAnswer = new UserAnswer();
         BeanUtils.copyProperties(userAnswerAddRequest, userAnswer);
-        userAnswer.setChoices(JSONUtil.toJsonStr(userAnswerAddRequest.getChoices()));
+        List<String> choiceList = userAnswerAddRequest.getChoices();
+        userAnswer.setChoices(JSONUtil.toJsonStr(choiceList));
         // 数据校验
         userAnswerService.validUserAnswer(userAnswer, true);
+        // 判断app是否存在
+        Long appId = userAnswerAddRequest.getAppId();
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR, "应用不存在");
         // 填充默认值
         UserVO loginUser = userService.getLoginUser(request);
         userAnswer.setUserId(loginUser.getId());
@@ -72,6 +87,17 @@ public class UserAnswerController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
+        // 调用评分模块
+        try {
+            UserAnswer userAnswerWithResult = scoringStrategyExecutor.doScore(choiceList, app);
+            userAnswerWithResult.setId(newUserAnswerId);
+            userAnswerWithResult.setAppId(null);
+            userAnswerService.updateById(userAnswerWithResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "评分失败");
+        }
+        
         return ResultUtils.success(newUserAnswerId);
     }
 

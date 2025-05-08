@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.naming.Name;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +36,9 @@ import java.util.stream.Collectors;
  * @date  25-04-2025 00:11:06
  * @version 1.0
 */
-@Service
+
 @Slf4j
+@Service
 public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> implements QuestionService {
 
     @Resource

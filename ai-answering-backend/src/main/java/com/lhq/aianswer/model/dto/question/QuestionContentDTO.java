@@ -18,7 +18,7 @@ public class QuestionContentDTO {
     
     private String title;
     
-    private List<Option> optionList;
+    private List<Option> options;
     
     @Data
     @AllArgsConstructor
