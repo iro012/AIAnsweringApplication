@@ -14,10 +14,13 @@ import com.lhq.aianswer.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import static com.lhq.aianswer.constant.UserConstant.SALT;
 
 /**
  * 用户接口
@@ -120,6 +123,8 @@ public class UserController {
         ThrowUtils.throwIf(!userService.isAdmin(request), ErrorCode.NO_AUTH_ERROR);
         User user = new User();
         BeanUtils.copyProperties(userAddRequest, user);
+        String entryPassword = DigestUtils.md5DigestAsHex((SALT + "12345678").getBytes());
+        user.setUserPassword(entryPassword);
         boolean result = userService.save(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(user.getId());

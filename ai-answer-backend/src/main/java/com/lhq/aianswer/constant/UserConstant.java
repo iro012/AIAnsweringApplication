@@ -4,7 +4,12 @@ package com.lhq.aianswer.constant;
  * 用户常量
  */
 public interface UserConstant {
-
+    
+    /**
+     * 盐值，混淆密码
+     */
+    String SALT = "lhq";
+    
     /**
      * 用户登录态键
      */

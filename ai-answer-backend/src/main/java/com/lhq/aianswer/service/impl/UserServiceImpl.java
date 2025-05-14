@@ -19,18 +19,15 @@ import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.lhq.aianswer.constant.UserConstant.SALT;
+
 /**
  * 用户服务实现
  */
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-
-    /**
-     * 盐值，混淆密码
-     */
-    private static final String SALT = "lhq";
-
+    
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
