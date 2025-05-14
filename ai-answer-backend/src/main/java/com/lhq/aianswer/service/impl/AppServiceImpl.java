@@ -172,6 +172,7 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
             User user = null;
             if (userId != null && userId > 0) {
                  user = userService.getById(userId);
+                System.out.println(user);
             }
             appVO.setUser(UserVO.objToVo(user));
         });

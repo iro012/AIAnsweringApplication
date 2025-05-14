@@ -3,7 +3,7 @@ import { onMounted, reactive, ref, watchEffect } from "vue";
 import { listUserByPageUsingPost } from "@/api/userController";
 import message from "@arco-design/web-vue/es/message";
 import dayjs from "dayjs";
-import { listUserAnswerByPageUsingPost } from "@/api/userAnswerController";
+import { deleteUserAnswerUsingPost, listUserAnswerByPageUsingPost } from "@/api/userAnswerController";
 import { APP_SCORING_STRATEGY_MAP, APP_TYPE_MAP } from "@/constant/app";
 
 const formSearchParams = reactive<API.UserAnswerQueryRequest>({});
@@ -57,6 +57,26 @@ const onPageChange = (page: number) => {
     current: page,
   };
 };
+
+/**
+ * 删除
+ * @param record
+ */
+const doDelete = async (record: API.UserAnswer) => {
+  if (!record.id) {
+    return;
+  }
+
+  const res = await deleteUserAnswerUsingPost({
+    id: record.id,
+  });
+  if (res.data.code === 0) {
+    loadData();
+  } else {
+    message.error("删除失败，" + res.data.message);
+  }
+};
+
 /**
  * 组件挂载时加载数据
  */
@@ -120,6 +140,10 @@ const columns = [
     title: "更新时间",
     dataIndex: "updateTime",
     slotName: "updateTime",
+  },
+  {
+    title: "操作",
+    slotName: "optional",
   },
 ];
 </script>
@@ -188,6 +212,11 @@ const columns = [
       </template>
       <template #updateTime="{ record }">
         {{ dayjs(record.updateTime).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template #optional="{ record }">
+        <a-space>
+          <a-button status="danger" @click="doDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
   </div>

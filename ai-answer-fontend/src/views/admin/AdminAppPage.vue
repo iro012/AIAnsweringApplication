@@ -2,10 +2,15 @@
 import { reactive, ref, watchEffect } from "vue";
 import message from "@arco-design/web-vue/es/message";
 import dayjs from "dayjs";
-import { listAppByPageUsingPost } from "@/api/appController";
+import {
+  deleteAppUsingPost,
+  listAppByPageUsingPost,
+  reviewAppUsingPost,
+} from "@/api/appController";
 import {
   APP_SCORING_STRATEGY_MAP,
   APP_TYPE_MAP,
+  REVIEW_STATUS_ENUM,
   REVIEW_STATUS_MAP,
 } from "../../constant/app";
 
@@ -60,6 +65,53 @@ const onPageChange = (page: number) => {
     current: page,
   };
 };
+
+/**
+ * 审核
+ * @param record
+ * @param reviewStatus
+ * @param reviewMessage
+ */
+const doReview = async (
+  record: API.App,
+  reviewStatus: number,
+  reviewMessage: string
+) => {
+  if (!record.id) {
+    return;
+  }
+
+  const res = await reviewAppUsingPost({
+    id: record.id,
+    reviewStatus,
+    reviewMessage,
+  });
+  if (res.data.code === 0) {
+    loadData();
+  } else {
+    message.error("审核失败，" + res.data.message);
+  }
+};
+
+/**
+ * 删除
+ * @param record
+ */
+const doDelete = async (record: API.App) => {
+  if (!record.id) {
+    return;
+  }
+
+  const res = await deleteAppUsingPost({
+    id: record.id,
+  });
+  if (res.data.code === 0) {
+    loadData();
+  } else {
+    message.error("删除失败，" + res.data.message);
+  }
+};
+
 /**
  * 组件挂载时加载数据
  */
@@ -125,6 +177,10 @@ const columns = [
     dataIndex: "updateTime",
     slotName: "updateTime",
   },
+  {
+    title: "操作",
+    slotName: "optional",
+  },
 ];
 </script>
 
@@ -181,6 +237,25 @@ const columns = [
       </template>
       <template #updateTime="{ record }">
         {{ dayjs(record.updateTime).format("YYYY-MM-DD HH:mm:ss") }}
+      </template>
+      <template #optional="{ record }">
+        <a-space>
+          <a-button
+            v-if="record.reviewStatus !== REVIEW_STATUS_ENUM.PASS"
+            status="success"
+            @click="doReview(record, REVIEW_STATUS_ENUM.PASS, '')"
+            >通过
+          </a-button>
+          <a-button
+            v-if="record.reviewStatus !== REVIEW_STATUS_ENUM.REJECT"
+            status="warning"
+            @click="
+              doReview(record, REVIEW_STATUS_ENUM.REJECT, '不符合上架要求')
+            "
+            >拒绝
+          </a-button>
+          <a-button status="danger" @click="doDelete(record)">删除</a-button>
+        </a-space>
       </template>
     </a-table>
   </div>

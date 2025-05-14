@@ -1,8 +1,8 @@
 import { RouteRecordRaw } from "vue-router";
-import HomeView from "@/views/HomeView.vue";
 import UserLayout from "@/layouts/UserLayout.vue";
 import AccessEnum from "@/access/accessEnum";
 import NoAuth from "@/views/NoAuth.vue";
+import HomePage from "@/views/HomePage.vue";
 import UserLogin from "@/views/user/UserLoginPage.vue";
 import UserRegister from "@/views/user/UserRegisterPage.vue";
 import AdminUserPage from "@/views/admin/AdminUserPage.vue";
@@ -10,12 +10,14 @@ import AdminAppPage from "@/views/admin/AdminAppPage.vue";
 import AdminQuestionPage from "@/views/admin/AdminQuestionPage.vue";
 import AdminScoringResultPage from "@/views/admin/AdminScoringResultPage.vue";
 import AdminUserAnswerPage from "@/views/admin/AdminUserAnswerPage.vue";
+import AppDetailPage from "@/views/app/AppDetailPage.vue";
+import AddAppPage from "@/views/add/AddAppPage.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    name: "home",
-    component: HomeView,
+    name: "主页",
+    component: HomePage,
   },
   {
     path: "/noAuth",
@@ -63,6 +65,23 @@ export const routes: Array<RouteRecordRaw> = [
     component: AdminUserAnswerPage,
     meta: {
       access: AccessEnum.ADMIN,
+    },
+  },
+  {
+    path: "/app/add",
+    name: "添加应用页面",
+    component: AddAppPage,
+    meta: {
+      access: AccessEnum.USER,
+    },
+  },
+  {
+    path: "/app/detail/:id",
+    name: "应用详情页面",
+    component: AppDetailPage,
+    props: true,
+    meta: {
+      access: AccessEnum.USER,
     },
   },
   {
