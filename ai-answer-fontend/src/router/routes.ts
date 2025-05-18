@@ -12,6 +12,11 @@ import AdminScoringResultPage from "@/views/admin/AdminScoringResultPage.vue";
 import AdminUserAnswerPage from "@/views/admin/AdminUserAnswerPage.vue";
 import AppDetailPage from "@/views/app/AppDetailPage.vue";
 import AddAppPage from "@/views/add/AddAppPage.vue";
+import AddScoringResultPage from "@/views/add/AddScoringResultPage.vue";
+import AddQuestionPage from "@/views/add/AddQuestionPage.vue";
+import DoAnswerPage from "@/views/answer/DoAnswerPage.vue";
+import AnswerResultPage from "@/views/answer/AnswerResultPage.vue";
+import MyAnswerPage from "@/views/answer/MyAnswerPage.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -68,10 +73,65 @@ export const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: "/app/add",
-    name: "添加应用页面",
+    path: "/answer/do/:appId",
+    name: "应用答题页面",
+    component: DoAnswerPage,
+    props: true,
+    meta: {
+      access: AccessEnum.USER,
+    },
+  },
+  {
+    path: "/answer/result/:id",
+    name: "答案结果页面",
+    component: AnswerResultPage,
+    props: true,
+    meta: {
+      hideInMenu: true,
+      access: AccessEnum.USER,
+    },
+  },
+  {
+    path: "/answer/my",
+    name: "我的答案",
+    component: MyAnswerPage,
+    props: true,
+    meta: {
+      access: AccessEnum.USER,
+    },
+  },
+  {
+    path: "/add/app",
+    name: "创建应用",
+    component: AddAppPage,
+  },
+  {
+    path: "/add/app/:id",
+    name: "修改应用",
+    props: true,
     component: AddAppPage,
     meta: {
+      hideInMenu: true,
+      access: AccessEnum.USER,
+    },
+  },
+  {
+    path: "/add/scoring_result/:appId",
+    name: "创建评分",
+    props: true,
+    component: AddScoringResultPage,
+    meta: {
+      hideInMenu: true,
+      access: AccessEnum.USER,
+    },
+  },
+  {
+    path: "/add/question/:appId",
+    name: "创建问题",
+    props: true,
+    component: AddQuestionPage,
+    meta: {
+      hideInMenu: true,
       access: AccessEnum.USER,
     },
   },
@@ -84,6 +144,7 @@ export const routes: Array<RouteRecordRaw> = [
       access: AccessEnum.USER,
     },
   },
+
   {
     path: "/user",
     name: "用户",

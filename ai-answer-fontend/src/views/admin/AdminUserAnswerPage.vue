@@ -122,6 +122,7 @@ const columns = [
   {
     title: "结果图标",
     dataIndex: "resultPicture",
+    slotName: "resultPicture",
   },
   {
     title: "得分",
@@ -207,6 +208,9 @@ const columns = [
       <template #scoringStrategy="{ record }">
         {{ APP_SCORING_STRATEGY_MAP[record.scoringStrategy] }}
       </template>
+      <template #resultPicture="{ record }">
+        <a-image :src="record.resultPicture" width="50px" />
+      </template>
       <template #createTime="{ record }">
         {{ dayjs(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
@@ -215,6 +219,7 @@ const columns = [
       </template>
       <template #optional="{ record }">
         <a-space>
+          <a-button :href="`/answer/result/${record.id}`">查看结果</a-button>
           <a-button status="danger" @click="doDelete(record)">删除</a-button>
         </a-space>
       </template>

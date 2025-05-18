@@ -53,11 +53,11 @@ onMounted(() => {
           </a-space>
           <p>创建时间：{{dayjs(app?.createTime).format("YYYY-MM-DD HH:mm:ss")}}</p>
           <a-space>
-            <a-button type="primary">开始答题</a-button>
+            <a-button type="primary" :href="`/answer/do/${app?.id}`">开始答题</a-button>
             <a-button>分享应用</a-button>
-            <a-button>设置题目</a-button>
-            <a-button>设置评分</a-button>
-            <a-button>修改应用</a-button>
+            <a-button :href="`/add/question/${app?.id}`">设置题目</a-button>
+            <a-button :href="`/add/scoring_result/${app?.id}`">设置评分</a-button>
+            <a-button :href="`/add/app/${app?.id}`">修改应用</a-button>
           </a-space>
         </a-col>
         <a-col flex="320px">

@@ -1,5 +1,6 @@
 package com.lhq.aianswer.controller;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lhq.aianswer.annotation.AuthCheck;
 import com.lhq.aianswer.common.BaseResponse;
@@ -115,6 +116,7 @@ public class ScoringResultController {
         // 在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
         BeanUtils.copyProperties(scoringResultUpdateRequest, scoringResult);
+        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultUpdateRequest.getResultProp()));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, false);
         // 判断是否存在
@@ -221,6 +223,8 @@ public class ScoringResultController {
         //  在此处将实体类和 DTO 进行转换
         ScoringResult scoringResult = new ScoringResult();
         BeanUtils.copyProperties(scoringResultEditRequest, scoringResult);
+        // 填充 scoringResult 的 prop
+        scoringResult.setResultProp(JSONUtil.toJsonStr(scoringResultEditRequest.getResultProp()));
         // 数据校验
         scoringResultService.validScoringResult(scoringResult, false);
         UserVO loginUser = userService.getLoginUser(request);
