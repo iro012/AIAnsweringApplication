@@ -17,6 +17,54 @@ export async function addQuestionUsingPost(
   });
 }
 
+/** aiGenerateQuestion POST /api/question/ai_generate */
+export async function aiGenerateQuestionUsingPost(
+  body: API.AiGenerateQuestionRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseListQuestionContentDTO_>(
+    "/api/question/ai_generate",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
+/** aiGenerateQuestionSse GET /api/question/ai_generate/sse */
+export async function aiGenerateQuestionSseUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.aiGenerateQuestionSseUsingGETParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.SseEmitter>("/api/question/ai_generate/sse", {
+    method: "GET",
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
+/** aiGenerateQuestionSseTest GET /api/question/ai_generate/sse/test */
+export async function aiGenerateQuestionSseTestUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.aiGenerateQuestionSseTestUsingGETParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.SseEmitter>("/api/question/ai_generate/sse/test", {
+    method: "GET",
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** deleteQuestion POST /api/question/delete */
 export async function deleteQuestionUsingPost(
   body: API.DeleteRequest,

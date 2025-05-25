@@ -17,6 +17,7 @@ import AddQuestionPage from "@/views/add/AddQuestionPage.vue";
 import DoAnswerPage from "@/views/answer/DoAnswerPage.vue";
 import AnswerResultPage from "@/views/answer/AnswerResultPage.vue";
 import MyAnswerPage from "@/views/answer/MyAnswerPage.vue";
+import AppStatisticPage from "@/views/statistic/AppStatisticPage.vue";
 
 export const routes: Array<RouteRecordRaw> = [
   {
@@ -73,11 +74,20 @@ export const routes: Array<RouteRecordRaw> = [
     },
   },
   {
+    path: "/admin/app_statistic",
+    name: "应用统计",
+    component: AppStatisticPage,
+    meta: {
+      access: AccessEnum.ADMIN,
+    },
+  },
+  {
     path: "/answer/do/:appId",
     name: "应用答题页面",
     component: DoAnswerPage,
     props: true,
     meta: {
+      hideInMenu: true,
       access: AccessEnum.USER,
     },
   },

@@ -18,85 +18,69 @@ import java.util.List;
  * @version 1.0
  * @date 2025/5/19 上午10:50
  */
+@Deprecated
 @Component
 public class AiManager {
     @Resource
     private ClientV4 clientV4;
     
+    // 较稳定的随机数
     private static final float STABLE_TEMPERATURE = 0.05f;
+    
+    // 不稳定的随机数
     private static final float UNSTABLE_TEMPERATURE = 0.95f;
     
     /**
-     * 通用同步请求（答案较稳定）
-     * @param systemMessages
-     * @param userMessages
+     * 同步调用（答案较稳定）
+     *
+     * @param systemMessage
+     * @param userMessage
      * @return
      */
-    public String doSyncUnstableRequest(String systemMessages, String userMessages) {
-        return doSyncRequest(systemMessages, userMessages, UNSTABLE_TEMPERATURE);
+    public String doSyncStableRequest(String systemMessage, String userMessage) {
+        return doSyncRequest(systemMessage, userMessage, STABLE_TEMPERATURE);
     }
     
     /**
-     * 通用同步请求（答案较稳定）
-     * @param systemMessages
-     * @param userMessages
+     * 同步调用（答案较随机）
+     *
+     * @param systemMessage
+     * @param userMessage
      * @return
      */
-    public String doSyncStableRequest(String systemMessages, String userMessages) {
-        return doSyncRequest(systemMessages, userMessages, STABLE_TEMPERATURE);
+    public String doSyncUnstableRequest(String systemMessage, String userMessage) {
+        return doSyncRequest(systemMessage, userMessage, UNSTABLE_TEMPERATURE);
     }
     
-    /**
-     * 通用同步请求
-     * @param systemMessages
-     * @param userMessages
-     * @param temperature
-     * @return
-     */
-    public String doSyncRequest(String systemMessages, String userMessages, Float temperature) {
-        return doRequest(systemMessages, userMessages, Boolean.FALSE, temperature);
+    
+    public String doSyncRequest(String systemMessage, String userMessage, Float temperature) {
+        return doRequest(systemMessage, userMessage, Boolean.FALSE, temperature);
     }
     
-    /**
-     * 通用请求，简化了消息传递
-     * @param systemMessages
-     * @param userMessages
-     * @param stream
-     * @param temperature
-     * @return
-     */
-    public String doRequest(String systemMessages, String userMessages, Boolean stream, Float temperature) {
-        // 创建一个ArrayList来存储ChatMessage对象
-        ArrayList<ChatMessage> messages = new ArrayList<>();
-        // 创建一个ChatMessage对象，角色为SYSTEM，内容为systemMessages
-        ChatMessage systemMessage = new ChatMessage(ChatMessageRole.SYSTEM.value(), systemMessages);
-        // 创建一个ChatMessage对象，角色为USER，内容为userMessages
-        ChatMessage userMessage = new ChatMessage(ChatMessageRole.USER.value(), userMessages);
-        // 将systemMessage添加到messages中
-        messages.add(systemMessage);
-        // 将userMessage添加到messages中
-        messages.add(userMessage);
-        // 调用doRequest方法，传入messages，stream和temperature参数
+    
+    public String doRequest(String systemMessage, String userMessage, Boolean stream, Float temperature) {
+        // 构造请求
+        List<ChatMessage> messages = new ArrayList<>();
+        ChatMessage systemChatMessage = new ChatMessage(ChatMessageRole.SYSTEM.value(), systemMessage);
+        ChatMessage userChatMessage = new ChatMessage(ChatMessageRole.USER.value(), userMessage);
+        messages.add(systemChatMessage);
+        messages.add(userChatMessage);
         return doRequest(messages, stream, temperature);
     }
     
-    /**
-     * 用于初始化 AiManager 对象
-     * @param messages
-     * @param stream
-     * @param temperature
-     * @return
-     */
+    
     public String doRequest(List<ChatMessage> messages, Boolean stream, Float temperature) {
         // 构造请求
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
             .model(Constants.ModelChatGLM4)
             .stream(stream)
+            .invokeMethod(Constants.invokeMethod)
             .temperature(temperature)
             .messages(messages)
             .build();
-        ModelApiResponse invokeModelApi = clientV4.invokeModelApi(chatCompletionRequest);
-        ChatMessage result = invokeModelApi.getData().getChoices().get(0).getMessage();
+        ModelApiResponse invokeModelApiResp = clientV4.invokeModelApi(chatCompletionRequest);
+        ChatMessage result = invokeModelApiResp.getData().getChoices().get(0).getMessage();
         return result.getContent().toString();
     }
+    
 }

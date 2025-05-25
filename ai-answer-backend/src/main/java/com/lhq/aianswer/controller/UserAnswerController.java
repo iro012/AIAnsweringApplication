@@ -1,5 +1,6 @@
 package com.lhq.aianswer.controller;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lhq.aianswer.annotation.AuthCheck;
@@ -55,6 +56,8 @@ public class UserAnswerController {
     
     @Resource
     private ScoringStrategyExecutor scoringStrategyExecutor;
+    
+    
 
     // region 增删改查
 
@@ -83,8 +86,12 @@ public class UserAnswerController {
         UserVO loginUser = userService.getLoginUser(request);
         userAnswer.setUserId(loginUser.getId());
         // 写入数据库
-        boolean result = userAnswerService.save(userAnswer);
-        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        try {
+            boolean result = userAnswerService.save(userAnswer);
+            ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        } catch (Exception e) {
+            // ignore error
+        }
         // 返回新写入的数据 id
         long newUserAnswerId = userAnswer.getId();
         // 调用评分模块
@@ -95,7 +102,7 @@ public class UserAnswerController {
             userAnswerService.updateById(userAnswerWithResult);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "评分失败");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "评分错误");
         }
         
         return ResultUtils.success(newUserAnswerId);
@@ -267,4 +274,10 @@ public class UserAnswerController {
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }
+    
+    @GetMapping("generate/id")
+    public BaseResponse<Long> generateUserAnswerId() {
+        return ResultUtils.success(IdUtil.getSnowflakeNextId());
+    }
 }
+

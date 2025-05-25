@@ -2,7 +2,7 @@ import axios from "axios";
 
 const myAxios = axios.create({
   baseURL: "http://localhost:8080",
-  timeout: 1000,
+  timeout: 20000,
   withCredentials: true, // 允许跨域携带cookie
 });
 

@@ -9,23 +9,50 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
-  # session 配置
-  session:
-    store-type: redis
-    # 30 天过期
-    timeout: 2592000
-  # 数据库配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/ai_answer
-    username: root
-    password: 123456
   # Redis 配置
-#  redis:
+  redis:
     database: 1
     host: localhost
     port: 6379
     timeout: 5000
+  # session 配置
+  session:
+    store-type: redis
+    # 1 天过期
+    timeout: 86400
+
+  # 分库分表配置
+  shardingsphere:
+    #数据源配置
+    datasource:
+      # 多数据源以逗号隔开即可
+      names: db0
+      db0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/ai_answer?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&characterEncoding=utf8
+        username: root
+        password: 123456
+    # 规则配置
+    rules:
+      sharding:
+        # 分片算法配置
+        sharding-algorithms:
+          # 自定义分片规则名
+          answer-table-inline:
+            ## inline 类型是简单的配置文件里面就能写的类型，其他还有自定义类等等
+            type: INLINE
+            props:
+              algorithm-expression: user_answer_$->{appId % 2}
+        tables:
+          user_answer:
+            actual-data-nodes: db0.user_answer_$->{0..1}
+            # 分表策略
+            table-strategy:
+              standard:
+                sharding-column: appId
+                sharding-algorithm-name: answer-table-inline
+
 server:
   address: 0.0.0.0
   port: 8080
@@ -46,3 +73,5 @@ mybatis-plus:
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
 ai:
   aiKey: 61ee949d981e4b18afd6f98d7b58b305.o7emgQceKRAM2YMR
+  apiKey: 05a1ebf0-2637-4488-89be-a376e1dab61c
+  baseUrl: https://ark.cn-beijing.volces.com/api/v3

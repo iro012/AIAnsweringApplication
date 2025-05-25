@@ -57,11 +57,13 @@ public class UserAnswerServiceImpl extends ServiceImpl<UserAnswerMapper, UserAns
         // 从对象中取值
         Long appId = userAnswer.getAppId();
         String choices = userAnswer.getChoices();
+        Long id = userAnswer.getId();
         
         // 创建数据时，参数不能为空
         if (add) {
             // 补充校验规则
             ThrowUtils.throwIf(ObjectUtils.isEmpty(appId) && appId < 0, ErrorCode.PARAMS_ERROR);
+            ThrowUtils.throwIf(ObjectUtils.isEmpty(id) && id < 0, ErrorCode.PARAMS_ERROR);
             ThrowUtils.throwIf(StringUtils.isBlank(choices), ErrorCode.PARAMS_ERROR);
         }
         // 修改数据时，有参数则校验

@@ -1,4 +1,24 @@
 declare namespace API {
+  type AiGenerateQuestionRequest = {
+    appId?: number;
+    optionNumber?: number;
+    questionNumber?: number;
+  };
+
+  type aiGenerateQuestionSseTestUsingGETParams = {
+    appId?: number;
+    /** isVip */
+    isVip?: boolean;
+    optionNumber?: number;
+    questionNumber?: number;
+  };
+
+  type aiGenerateQuestionSseUsingGETParams = {
+    appId?: number;
+    optionNumber?: number;
+    questionNumber?: number;
+  };
+
   type App = {
     appDesc?: string;
     appIcon?: string;
@@ -22,6 +42,16 @@ declare namespace API {
     appName?: string;
     appType?: number;
     scoringStrategy?: number;
+  };
+
+  type AppAnswerCountDTO = {
+    appId?: string;
+    count?: number;
+  };
+
+  type AppAnswerResultCountDTO = {
+    count?: number;
+    resultName?: string;
   };
 
   type AppEditRequest = {
@@ -88,6 +118,24 @@ declare namespace API {
   type BaseResponseBoolean_ = {
     code?: number;
     data?: boolean;
+    message?: string;
+  };
+
+  type BaseResponseListAppAnswerCountDTO_ = {
+    code?: number;
+    data?: AppAnswerCountDTO[];
+    message?: string;
+  };
+
+  type BaseResponseListAppAnswerResultCountDTO_ = {
+    code?: number;
+    data?: AppAnswerResultCountDTO[];
+    message?: string;
+  };
+
+  type BaseResponseListQuestionContentDTO_ = {
+    code?: number;
+    data?: QuestionContentDTO[];
     message?: string;
   };
 
@@ -183,6 +231,11 @@ declare namespace API {
 
   type DeleteRequest = {
     id?: number;
+  };
+
+  type getAnswerResultCountUsingGETParams = {
+    /** appId */
+    appId: number;
   };
 
   type getAppVOByIdUsingGETParams = {
@@ -470,6 +523,10 @@ declare namespace API {
     userId?: number;
   };
 
+  type SseEmitter = {
+    timeout?: number;
+  };
+
   type User = {
     createTime?: string;
     id?: number;
@@ -511,6 +568,7 @@ declare namespace API {
     appId?: number;
     appType?: number;
     choices?: string[];
+    id?: number;
     scoringStrategy?: number;
   };
 
