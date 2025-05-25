@@ -1,8 +1,11 @@
 <script lang="ts" setup>
+import { IconShareInternal } from "@arco-design/web-vue/es/icon";
 import { listAppVoByPageUsingPost } from "@/api/appController";
 import { ref, watchEffect } from "vue";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
+import ShareModal from "@/components/ShareModal.vue";
+import AppCard from "@/components/AppCard.vue";
 
 const router = useRouter();
 
@@ -11,7 +14,6 @@ const initSearchParams = {
   current: 1,
   pageSize: 10,
 };
-
 
 const dataList = ref<API.AppVO>([]);
 const total = ref<number>();
@@ -43,10 +45,6 @@ const loadData = async () => {
   }
 };
 
-const doCardClick = (item: API.AppVO) => {
-  router.push(`/app/detail/${item.id}`);
-};
-
 watchEffect(() => {
   loadData();
 });
@@ -76,40 +74,7 @@ watchEffect(() => {
         @page-change="onPageChange"
       >
         <template #item="{ item }">
-          <a-card
-            hoverable
-            :style="{ width: '360px' }"
-            @click="doCardClick(item)"
-          >
-            <template #cover>
-              <div
-                :style="{
-                  height: '204px',
-                  overflow: 'hidden',
-                }"
-              >
-                <img
-                  :style="{ width: '100%', transform: 'translateY(-20px)' }"
-                  alt="dessert"
-                  :src="item.appIcon"
-                />
-              </div>
-            </template>
-            <a-card-meta>
-              <template #description>
-                <div style="text-align: left">
-                  <h2>{{ item.appName }}</h2>
-                  <p>{{ item.appDesc }}</p>
-                  <a-space>
-                    <a-avatar>
-                      <img alt="头像" :src="item.user?.userAvatar" />
-                    </a-avatar>
-                    <span>{{ item.user?.userName }}</span>
-                  </a-space>
-                </div>
-              </template>
-            </a-card-meta>
-          </a-card>
+          <AppCard :app="item" />
         </template>
       </a-list>
     </a-space>

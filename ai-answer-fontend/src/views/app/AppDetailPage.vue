@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { getAppVoByIdUsingGet } from "@/api/appController";
 import message from "@arco-design/web-vue/es/message";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import {
   APP_SCORING_STRATEGY_ENUM,
   APP_SCORING_STRATEGY_MAP,
 } from "../../constant/app";
 import dayjs from "dayjs";
+import ShareModal from "@/components/ShareModal.vue";
+import { useLoginUserStore } from "@/stores/userStore";
+import AccessEnum from "@/access/accessEnum";
 
 interface Props {
   id: string;
@@ -15,6 +18,24 @@ interface Props {
 const props = defineProps<Props>();
 
 const app = ref<API.AppVO>();
+
+// 获取登录用户
+const { loginUser } = useLoginUserStore();
+// 是否为本人或者管理员
+const isSelfOrAdmin = computed(() => {
+  if (loginUser) {
+    return (
+      loginUser.id === app.value?.userId ||
+      loginUser.userRole === AccessEnum.ADMIN
+    );
+  }
+  return false;
+});
+
+// 分享弹窗的引用
+const shareModalRef = ref();
+// 分享链接
+const shareLink = `${window.location.protocol}//${window.location.host}/app/detail/${props.id}`;
 
 /**
  * 获取app信息
@@ -30,10 +51,15 @@ const loadData = async () => {
     message.error("获取数据失败，" + res.data.message);
   }
 };
-
 onMounted(() => {
   loadData();
 });
+
+const doShare = () => {
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal();
+  }
+};
 </script>
 
 <template>
@@ -51,14 +77,21 @@ onMounted(() => {
             </a-avatar>
             {{ app?.user?.userName }}
           </a-space>
-          <p>创建时间：{{dayjs(app?.createTime).format("YYYY-MM-DD HH:mm:ss")}}</p>
+          <p>
+            创建时间：{{ dayjs(app?.createTime).format("YYYY-MM-DD HH:mm:ss") }}
+          </p>
           <a-space>
-            <a-button type="primary" :href="`/answer/do/${app?.id}`">开始答题</a-button>
-            <a-button>分享应用</a-button>
-            <a-button :href="`/add/question/${app?.id}`">设置题目</a-button>
-            <a-button :href="`/add/scoring_result/${app?.id}`">设置评分</a-button>
-            <a-button :href="`/add/app/${app?.id}`">修改应用</a-button>
+            <a-button type="primary" :href="`/answer/do/${app?.id}`"
+              >开始答题</a-button
+            >
+            <a-button @click="doShare">分享应用</a-button>
+            <a-button v-if="isSelfOrAdmin" :href="`/add/question/${app?.id}`">设置题目</a-button>
+            <a-button v-if="isSelfOrAdmin" :href="`/add/scoring_result/${app?.id}`"
+              >设置评分</a-button
+            >
+            <a-button v-if="isSelfOrAdmin" :href="`/add/app/${app?.id}`">修改应用</a-button>
           </a-space>
+          <ShareModal :link="shareLink" ref="shareModalRef" />
         </a-col>
         <a-col flex="320px">
           <a-image width="100%" :src="app?.appIcon" />
@@ -69,7 +102,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-
 #app-detail {
   padding: 24px;
 }
@@ -81,5 +113,4 @@ onMounted(() => {
 #app-detail .content-wrapper > * {
   margin-bottom: 24px;
 }
-
 </style>

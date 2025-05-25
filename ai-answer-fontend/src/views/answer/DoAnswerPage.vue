@@ -3,7 +3,10 @@ import { getAppVoByIdUsingGet } from "@/api/appController";
 import { computed, ref, watchEffect } from "vue";
 import message from "@arco-design/web-vue/es/message";
 import { listQuestionVoByPageUsingPost } from "@/api/questionController";
-import { addUserAnswerUsingPost } from "@/api/userAnswerController";
+import {
+  addUserAnswerUsingPost,
+  generateUserAnswerIdUsingGet,
+} from "@/api/userAnswerController";
 import { useRouter } from "vue-router";
 
 interface Props {
@@ -27,7 +30,7 @@ const questionOptions = computed(() => {
   return currentQuesiton.value?.options?.map((option) => {
     return {
       label: `${option.key}. ${option.value}`,
-      value: option.key
+      value: option.key,
     };
   });
 });
@@ -37,13 +40,32 @@ const currentAnswer = ref<string>();
 // 题目答案列表
 const answerList = ref<string[]>([]);
 
+const loading = ref(false);
+
+// 用户答案 id
+const id = ref<number>();
+
+const getUserAnswerId = async () => {
+  const res = await generateUserAnswerIdUsingGet();
+  if (res.data.code === 0) {
+    return (id.value = res.data.data);
+  } else {
+    message.error("获取用户答题id失败，" + res.data.message);
+  }
+};
+
+watchEffect(() => {
+  getUserAnswerId();
+});
+
+
 const loadData = async () => {
   if (!props.appId) {
     return;
   }
 
   let res = await getAppVoByIdUsingGet({
-    id: props.appId
+    id: props.appId,
   });
 
   if (res.data.code === 0) {
@@ -53,7 +75,7 @@ const loadData = async () => {
   }
 
   res = await listQuestionVoByPageUsingPost({
-    appId: props.appId
+    appId: props.appId,
   });
   if (res.data.code === 0 && res.data.data) {
     questionContent.value = res.data.data.records[0].questionContent || [];
@@ -81,9 +103,11 @@ const doSubmit = async () => {
   if (!props.appId || answerList.value.length != questionContent.value.length) {
     return;
   }
+  loading.value = true;
   const res = await addUserAnswerUsingPost({
     appId: props.appId,
     choices: answerList.value,
+    id: id.value,
   });
   if (res.data.code === 0 && res.data.data) {
     message.success("提交成功");
@@ -91,6 +115,7 @@ const doSubmit = async () => {
   } else {
     message.error("提交失败，" + res.data.message);
   }
+  loading.value = false;
 };
 
 // 改变 current 题号时，会自动更新当前题目和答案
@@ -118,6 +143,7 @@ watchEffect(() => {
             v-if="answerList.length == 10"
             type="primary"
             @click="doSubmit"
+            :loading="loading"
             >提交
           </a-button>
           <a-button

@@ -1,16 +1,13 @@
 <script setup lang="ts">
 // 表单
-import { onMounted, reactive, ref, watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
-import { APP_SCORING_STRATEGY_MAP, APP_TYPE_MAP } from "@/constant/app";
 import {
-  addAppUsingPost,
-  getAppVoByIdUsingGet,
-  updateAppUsingPost,
-} from "@/api/appController";
-import { options } from "axios";
-import { addQuestionUsingPost, listQuestionVoByPageUsingPost } from "@/api/questionController";
+  addQuestionUsingPost,
+  listQuestionVoByPageUsingPost,
+} from "@/api/questionController";
+import AiGenerateQuestionDrawer from "@/components/AiGenerateQuestionDrawer.vue";
 
 interface Props {
   appId: string;
@@ -66,11 +63,13 @@ const loadData = async () => {
   } else {
     message.error("加载题目失败，" + res.data.message);
   }
-}
+};
 
 watchEffect(() => {
   loadData();
-})
+});
+
+
 
 /**
  * 提交表单
@@ -83,25 +82,70 @@ const handleSubmit = async (data) => {
   const res = await addQuestionUsingPost({
     questionContent: questionContent.value,
     appId: props.appId,
-  })
+  });
   if (res.data.code === 0) {
     message.success("添加成功");
     router.push(`/app/detail/${props.appId}`);
   } else {
     message.error("添加失败，" + res.data.message);
   }
-}
+};
+
+/**
+ * AI 生成题目成功后执行
+ * @param result
+ */
+const onAiGenerateSuccess = (result: API.QuestionContentDTO[]) => {
+  questionContent.value = [...questionContent.value, ...result];
+  message.success(`AI 生成题目成功，已新增 ${result.length} 道题目`);
+};
+
+/**
+ * AI 生成题目成功后执行（SSE）
+ */
+const onAiGenerateSuccessSSE = (result: API.QuestionContentDTO) => {
+  questionContent.value = [...questionContent.value, result];
+};
+
+/**
+ * SSE 开始生成
+ * @param event
+ */
+const onSSEStart = (event: any) => {
+  message.success("开始生成");
+};
+
+/**
+ * SSE 生成完毕
+ * @param event
+ */
+const onSSEClose = (event: any) => {
+  message.success("生成完毕");
+};
 
 </script>
 
 <template>
   <div id="add-question">
-    <a-form :model="questionContent" :style="{ width: '600px' }" @submit="handleSubmit">
+    <a-form
+      :model="questionContent"
+      :style="{ width: '600px' }"
+      @submit="handleSubmit"
+    >
       <a-form-item label="应用id">
         {{ props.appId }}
       </a-form-item>
       <a-form-item label="应用列表">
-        <a-button @click="addQuesiton">底部添加题目</a-button>
+        <a-space>
+          <a-button @click="addQuesiton">底部添加题目</a-button>
+          <AiGenerateQuestionDrawer
+            :app-id="appId"
+            :onSuccess="onAiGenerateSuccess"
+            :onSSESuccess="onAiGenerateSuccessSSE"
+            :onSSEClose="onSSEClose"
+            :onSSEStart="onSSEStart"
+          />
+        </a-space>
       </a-form-item>
       <div v-for="(question, index) of questionContent" :key="index">
         <a-space>
@@ -156,7 +200,6 @@ const handleSubmit = async (data) => {
         </a-button>
       </a-form-item>
     </a-form>
-    {{ questionContent }}
   </div>
 </template>
 

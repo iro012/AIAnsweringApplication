@@ -17,11 +17,6 @@ router.beforeEach(async (to, from, next) => {
     firstFetchLoginUser = false;
   }
 
-  if (!loginUser || !loginUser.userRole) {
-    await loginUserStore.fetchLoginUser();
-    loginUser = loginUserStore.loginUser;
-  }
-
   const needAccess = to.meta.access ?? AccessEnum.NOT_LOGIN;
   if (needAccess != AccessEnum.NOT_LOGIN) {
     // 没有登录，跳转到登录页面
